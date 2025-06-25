@@ -1,20 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
-//compiler
 import 'dart:ffi';
-import 'package:ffi/ffi.dart';
-import 'package:unb_sql/widgets.dart';
-import 'ponte_ffi_bindings_generated.dart';
-
-// APP
-List<Color> cores = [
-  const Color(0xFF201c1c),
-];
+import 'package:ffi/ffi.dart'; // para toNativeUtf8 e toDartString
 
 void main() {
-  // COMPILER
   // Use o nome correto da sua biblioteca:
   // final dylib = DynamicLibrary.open('libinterpreter.so'); // Linux
   final dylib = DynamicLibrary.open('libinterpreter.dylib'); // macOS
@@ -38,17 +25,4 @@ void main() {
     print('Erro ao traduzir comando');
   }
   calloc.free(commandPtr); // Use calloc/free se usar o package:ffi/ffi.dart
-
-  // APP
-  runApp(MultiBlocProvider(
-    providers: [
-      BlocProvider(
-        create: (_) => ThemeCubit(),
-      ),
-      BlocProvider(
-        create: (_) => MainPageCubit(),
-      ),
-    ],
-    child: const MainApp(),
-  ));
 }

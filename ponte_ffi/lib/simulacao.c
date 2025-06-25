@@ -893,6 +893,53 @@ void generate_select_sql(ASTSelect *ast, char *output, int maxlen) {
 }
 
 
+#include "header.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+
+API const char* translate_to_sql(const char* custom_command) {
+    static __thread char error_msg[128];
+
+    Lexer lexer = { .src = custom_command, .pos = 0 };
+    lexer_tokenize(&lexer);
+
+    Parser parser = { .tokens = lexer.tokens, .pos = 0 };
+    Token *t = parser_peek(&parser);
+
+    char *sql = (char*)malloc(4096);
+    if (!sql) return NULL;
+
+    sql[0] = 0;
+
+    if (t->type == TK_INSERE) {
+        ASTInsert ast = {0};
+        parse_insert(&parser, &ast);
+        semantic_check(&ast);
+        optimize(&ast);
+        generate_insert_sql(&ast, sql, 4096);
+    }
+    else if (t->type == TK_CRIAR) {
+        ASTCreateTable ast = {0};
+        parse_create_table(&parser, &ast);
+        generate_create_sql(&ast, sql, 4096);
+    }
+    else if (t->type == TK_SELECIONE) {
+        ASTSelect ast = {0};
+        parse_select(&parser, &ast);
+        generate_select_sql(&ast, sql, 4096);
+    }
+    else {
+        free(sql);
+        return NULL;
+    }
+
+    return sql;
+}
+
+API void free_translated_string(const char* sql_string) {
+    free((void*)sql_string);
+}
 
 
 int main() {
